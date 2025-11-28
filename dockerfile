@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 ubuntu:22.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
 
@@ -10,7 +10,15 @@ RUN apt-get update && apt-get install -y \
     git \
     tzdata \
     expect \
+    unzip \
+    gpg \
+    lsb-release \
     && apt-get clean
+
+# Install Terraform
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list \
+    && apt-get update && apt-get install -y terraform
 
 # Create a user for the runner
 RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo \
@@ -23,9 +31,9 @@ WORKDIR /home/docker
 #RUN sudo apt-get install expect -y
 
 # Download the GitHub runner
-RUN curl -o actions-runner-linux-arm64-2.320.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.320.0/actions-runner-linux-arm64-2.320.0.tar.gz \
-    && tar xzf ./actions-runner-linux-arm64-2.320.0.tar.gz \
-    && rm ./actions-runner-linux-arm64-2.320.0.tar.gz
+RUN curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz \
+    && tar xzf ./actions-runner-linux-x64-2.325.0.tar.gz \
+    && rm ./actions-runner-linux-x64-2.325.0.tar.gz
 
 
 # Install GitHub runner dependencies
@@ -37,7 +45,5 @@ COPY entrypoint.sh .
 
 # Make the script executable
 RUN sudo chmod +x entrypoint.sh
-#RUN sudo chmod +x wte.sh
-RUN ./entrypoint.sh
 
-ENTRYPOINT ["./run.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
