@@ -6,9 +6,9 @@ read -p "Enter Repository Name, for your Runner: " REPO_NAME
 
 read -p "Enter Repository Token, for your access: " REPO_TOKEN
 
-read -p "Enter Container Name" RUNNER_CONTAINER
+read -p "Enter Container Name: " RUNNER_CONTAINER
 
-REPO_URL=git@github.com:Capson12/docker_runner.git
+REPO_URL="git@github.com:Capson12/docker_runner.git"
 
 
 git clone --no-checkout $REPO_URL repo
@@ -16,7 +16,7 @@ cd repo
 
 git sparse-checkout init --cone
 
-git sparse-checkout set "github/$FOLDER_NAME"
+git sparse-checkout set "github/runners/$FOLDER_NAME"
 
 git checkout
 
