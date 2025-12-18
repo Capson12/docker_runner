@@ -12,4 +12,4 @@ read -p "Enter Container Name: " RUNNER_CONTAINER
 
 docker build -t $RUNNER_CONTAINER dck-runner-builder/repo/github/runners/$FOLDER_NAME
 
-docker run -d --name $REPO_NAME-$RUNNER_CONTAINER -e $REPO_NAME -e $REPO_TOKEN $RUNNER_CONTAINER
+docker run -d --name $RUNNER_CONTAINER -e $REPO_NAME -e $REPO_TOKEN $RUNNER_CONTAINER
