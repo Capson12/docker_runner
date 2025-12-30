@@ -19,6 +19,9 @@ RUN apt-get update && apt-get install -y \
     expect \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install Azure CLI
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
 # Install Terraform (from releases)
 RUN curl -fsSL -o /tmp/terraform.zip "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_amd64.zip" \
  && unzip /tmp/terraform.zip -d /usr/local/bin \
@@ -35,7 +38,7 @@ RUN if [ "${TG_VERSION}" = "latest" ]; then \
  && chmod +x /usr/local/bin/terragrunt
 
 # Verify tooling versions at build time
-RUN terraform --version && terragrunt --version
+RUN terraform --version && terragrunt --version && aws --version && az version
 
 # Create a user for the runner
 RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo \
