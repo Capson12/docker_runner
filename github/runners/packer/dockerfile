@@ -1,0 +1,52 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive TZ=Europe/London
+
+ARG PACKER_VERSION="1.10.2"
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    sudo \
+    jq \
+    git \
+    tzdata \
+    unzip \
+    gpg \
+    awscli \
+    lsb-release \
+    ca-certificates \
+    expect \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install Azure CLI
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
+# Install Packer
+RUN curl -fsSL -o /tmp/packer.zip "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip" \
+ && unzip /tmp/packer.zip -d /usr/local/bin \
+ && rm /tmp/packer.zip \
+ && chmod +x /usr/local/bin/packer
+
+# Verify tooling versions at build time
+RUN packer --version && aws --version && az version
+
+# Create a user for the runner
+RUN useradd -m docker && echo "docker:docker" | chpasswd && adduser docker sudo \
+    && echo "docker ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER docker
+WORKDIR /home/docker
+
+# Download the GitHub runner
+RUN curl -o actions-runner-linux-x64-2.325.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.325.0/actions-runner-linux-x64-2.325.0.tar.gz \
+    && tar xzf ./actions-runner-linux-x64-2.325.0.tar.gz \
+    && rm ./actions-runner-linux-x64-2.325.0.tar.gz
+
+# Install GitHub runner dependencies
+RUN sudo ./bin/installdependencies.sh
+
+# Add the entrypoint script
+COPY entrypoint.sh .
+RUN sudo chmod +x entrypoint.sh
+
+ENTRYPOINT [ "./entrypoint.sh" ]
