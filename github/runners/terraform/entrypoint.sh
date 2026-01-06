@@ -23,7 +23,7 @@ spawn ./config.sh --url $GITHUB_URL --token $GITHUB_TOKEN
 
 send -- "\r"
 send -- "$RUNNER_NAME\r"
-send -- "Docker\r"
+send -- "terraform\r"
 send -- "\r"
 
 expect eof
