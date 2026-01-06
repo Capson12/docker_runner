@@ -2,7 +2,7 @@
 
 # Check if the required arguments are provided
 if [ "$#" -ne 3 ]; then
-    echo "Usage: $0 <repo_name> <repo_token>"
+    echo "Usage: $0 <repo_name> <repo_token> <runner_name>"
     exit 1
 fi
 
@@ -14,21 +14,21 @@ GITHUB_URL="https://github.com/Capson12/$REPO_NAME"
 # Start Docker daemon in the background
 sudo dockerd > /tmp/dockerd.log 2>&1 &
 
-# Wait for Docker daemon to be ready
-echo "Waiting for Docker daemon to start..."
-for i in {1..30}; do
-    if docker info > /dev/null 2>&1; then
-        echo "Docker daemon is ready!"
-        break
-    fi
-    sleep 1
-done
+# # Wait for Docker daemon to be ready
+# echo "Waiting for Docker daemon to start..."
+# for i in {1..30}; do
+#     if docker info > /dev/null 2>&1; then
+#         echo "Docker daemon is ready!"
+#         break
+#     fi
+#     sleep 1
+# done
 
-if ! docker info > /dev/null 2>&1; then
-    echo "Failed to start Docker daemon"
-    cat /tmp/dockerd.log
-    exit 1
-fi
+# if ! docker info > /dev/null 2>&1; then
+#     echo "Failed to start Docker daemon"
+#     cat /tmp/dockerd.log
+#     exit 1
+# fi
 
 # Configure the runner using expect
 expect << EOF
