@@ -1,36 +1,34 @@
 #!/bin/bash
-set -e
 
-# Configure runner, expects these env vars: GITHUB_URL, GITHUB_TOKEN, RUNNER_NAME
-if [[ -z "$GITHUB_URL" || -z "$GITHUB_TOKEN" ]]; then
-  echo "GITHUB_URL and GITHUB_TOKEN must be set as environment variables."
-  exit 1
+# Check if the required arguments are provided
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <repo_name> <repo_token>"
+    exit 1
 fi
 
-if [[ -z "$RUNNER_NAME" ]]; then
-  RUNNER_NAME="packer-runner-$(hostname)"
-fi
+REPO_NAME=$1
+GITHUB_TOKEN=$2
+RUNNER_NAME=$3
+GITHUB_URL="https://github.com/Capson12/$REPO_NAME"
 
-cd /home/docker/actions-runner
+# Configure the runner using expect
 
-# Remove previous config if exists
-if [ -f .runner ]; then
-  ./config.sh remove --unattended --token "$GITHUB_TOKEN" || true
-fi
+# 1.Runner Group
+# 2.name of runner
+# 3.Labels
+# 4.Accept default settings
+expect << EOF
+spawn ./config.sh --url $GITHUB_URL --token $GITHUB_TOKEN
 
-./config.sh \
-  --unattended \
-  --url "$GITHUB_URL" \
-  --token "$GITHUB_TOKEN" \
-  --name "$RUNNER_NAME" \
-  --labels "packer,ubuntu" \
-  --work "/home/docker/_work"
 
-cleanup() {
-  echo "Removing runner..."
-  ./config.sh remove --unattended --token "$GITHUB_TOKEN"
-}
-trap 'cleanup; exit 130' INT TERM
+send -- "\r"
+send -- "$RUNNER_NAME\r"
+send -- "packer\r"
+send -- "\r"
+
+expect eof
+EOF
 
 # Start the runner
-exec ./run.sh
+./run.sh
+
